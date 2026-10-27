@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack Text Editor</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .editor {
+            background: white;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        textarea {
+            width: 95%;
+            height: 200px;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background: #1769aa;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="editor">
+        <h2>Stack Text Editor</h2>
+        <p>Type something, then try Undo and Redo.</p>
+
+        <textarea id="text" placeholder="Start typing here..."></textarea>
+
+        <br>
+
+        <button id="undo" onclick="undo()">Undo</button>
+        <button id="redo" onclick="redo()">Redo</button>
+        <button onclick="clearText()">Clear</button>
+
+        <p id="status">Start typing to use the editor.</p>
+    </div>
+
+    <script>
+        const text = document.getElementById("text");
+        const undoButton = document.getElementById("undo");
+        const redoButton = document.getElementById("redo");
+        const status = document.getElementById("status");
+
+        // The two stacks
+        let undoStack = [];
+        let redoStack = [];
+
+        let lastValue = "";
+
+        // Save previous text when the user types
+        text.addEventListener("input", function () {
+            undoStack.push(lastValue);
+
+            // New typing clears the redo history
+            redoStack = [];
+
+            lastValue = text.value;
+            updateButtons();
+            status.textContent = "Text updated.";
+        });
+
+        // Restore the previous text
+        function undo() {
+            if (undoStack.length > 0) {
+                redoStack.push(text.value);
+
+                text.value = undoStack.pop();
+                lastValue = text.value;
+
+                updateButtons();
+                status.textContent = "Undo successful.";
+            }
+        }
+
+        // Restore an undone change
+        function redo() {
+            if (redoStack.length > 0) {
+                undoStack.push(text.value);
+
+                text.value = redoStack.pop();
+                lastValue = text.value;
+
+                updateButtons();
+                status.textContent = "Redo successful.";
+            }
+        }
+
+        // Clear the editor while keeping Undo available
+        function clearText() {
+            if (text.value !== "") {
+                undoStack.push(text.value);
+                redoStack = [];
+
+                text.value = "";
+                lastValue = "";
+
+                updateButtons();
+                status.textContent = "Text cleared.";
+            }
+        }
+
+        // Enable or disable buttons
+        function updateButtons() {
+            undoButton.disabled = undoStack.length === 0;
+            redoButton.disabled = redoStack.length === 0;
+        }
+
+        updateButtons();
+    </script>
+
+</body>
+</html>
